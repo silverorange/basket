@@ -42,6 +42,7 @@ class BrazeEndpoint(Enum):
     CAMPAIGNS_TRIGGER_SEND = "/campaigns/trigger/send"
     USERS_EXPORT_IDS = "/users/export/ids"
     USERS_TRACK = "/users/track"
+    SUBSCRIPTION_STATUS_SET = "/subscription/status/set"
 
 
 class BrazeClient:
@@ -115,7 +116,7 @@ class BrazeClient:
 
             raise BrazeClientError(message) from exc
 
-    def track_user(self, email, event=None, user_data=None):
+    def track_user(self, email, event=None, user_data=None, custom_attributes=None):
         """
         Track a user in Braze.
 
@@ -148,7 +149,7 @@ class BrazeClient:
                 attributes["basket_token"] = basket_token
 
         data = {
-            "attributes": [attributes],
+            "attributes": [attributes | custom_attributes],
         }
         # Events. Event names are based off of the message ID and trigger email sends in Braze.
         if event:
@@ -201,6 +202,18 @@ class BrazeClient:
         }
 
         return self._request(BrazeEndpoint.CAMPAIGNS_TRIGGER_SEND, data)
+
+    def set_subscription_status(self, email, newsletters):
+        """
+        Set subscription status for the specified newsletters
+
+        https://www.braze.com/docs/api/endpoints/subscription_groups/post_update_user_subscription_group_status/
+
+        """
+
+        data = {}
+
+        return self._request(BrazeEndpoint.SUBSCRIPTION_STATUS_SET, data)
 
 
 braze = BrazeClient(settings.BRAZE_BASE_API_URL, settings.BRAZE_API_KEY)
