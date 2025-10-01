@@ -302,6 +302,13 @@ def upsert_contact(api_call_type, data, user_data):
     if api_call_type != UNSUBSCRIBE and user_data.get("optout"):
         update_data["optout"] = False
 
+    # unsubcribe from newsletters in Braze
+    if api_call_type == UNSUBSCRIBE:
+        if settings.MAINTENANCE_MODE:
+            braze_unsubscribe.delay(user_data)
+        else:
+            braze_unsubscribe(update_data)
+
     # update record
     if user_data and user_data.get("token"):
         token = user_data["token"]
@@ -354,6 +361,17 @@ def ctms_add_or_update(update_data, user_data=None):
         update_data.pop("token", None)
         update_data.pop("email_id", None)
         ctms.update(user_data, update_data)
+
+
+@rq_task
+def braze_unsubscribe(update_data):
+    """
+    Unsubscribe from newsletters
+    """
+    unsubscribed_newsletter_slugs = [newsletter_slug for newsletter_slug, is_subscribed in update_data["newsletters"].items() if not is_subscribed]
+    unsubscribed_braze_ids = Newsletter.objects.filter(slug__in=unsubscribed_newsletter_slugs).values_list("braze_id", flat=True)
+
+    braze.set_subscription_status(update_data["email"], unsubscribed_braze_ids, "unsubscribed")
 
 
 @rq_task
