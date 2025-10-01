@@ -303,7 +303,7 @@ def upsert_contact(api_call_type, data, user_data):
         update_data["optout"] = False
 
     # unsubcribe from newsletters in Braze
-    if settings.BRAZE_SUBSCRIBE_ENABLE and api_call_type == UNSUBSCRIBE:
+    if settings.BRAZE_UNSUBSCRIBE_ENABLE and api_call_type == UNSUBSCRIBE:
         if settings.MAINTENANCE_MODE:
             braze_unsubscribe.delay(user_data)
         else:
