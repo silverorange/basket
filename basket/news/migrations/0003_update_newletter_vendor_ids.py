@@ -5,6 +5,14 @@ from django.db import migrations
 
 
 def update_newsletter_vendor_ids(apps, schema_editor):
+    """
+    Updates the vendor_id column with the subscription_group_id used in Braze
+    (dev or prod based on LOCAL_DEV env var).
+
+    Map source:
+    http://github.com/mozilla/bigquery-etl/blob/main/sql/moz-fx-data-shared-prod/braze_derived/subscriptions_map_v1/script.sql
+    """
+
     Newsletter = apps.get_model("news", "Newsletter")
 
     prod_slug_to_vendor_id = {
