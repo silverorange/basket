@@ -369,9 +369,7 @@ def braze_unsubscribe(update_data):
     Unsubscribe from newsletters in Braze
     """
     unsubscribed_newsletter_slugs = [newsletter_slug for newsletter_slug, is_subscribed in update_data["newsletters"].items() if not is_subscribed]
-    unsubscribed_braze_ids = list(
-        Newsletter.objects.filter(slug__in=unsubscribed_newsletter_slugs).exclude(braze_id__isnull=True).values_list("braze_id", flat=True)
-    )
+    unsubscribed_braze_ids = list(Newsletter.objects.filter(slug__in=unsubscribed_newsletter_slugs).values_list("vendor_id", flat=True))
 
     if len(unsubscribed_braze_ids) > 0:
         braze.set_subscription_status(update_data["email"], unsubscribed_braze_ids, "unsubscribed")
