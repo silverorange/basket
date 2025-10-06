@@ -480,3 +480,5 @@ if OIDC_ENABLE:
         "/readiness/",
         "/watchman/",
     ]
+
+BRAZE_POST_USER_ENABLE = config("BRAZE_POST_USER_ENABLE", parser=bool, default="false")
