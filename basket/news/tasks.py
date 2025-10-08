@@ -508,7 +508,7 @@ def braze_update_user_attributes(update_data, forced_optin):
         new_attributes["subscription_groups"] = [
             {
                 "subscription_group_id": newsletter["vendor_id"],
-                "subscription_state": "subscribed" if newsletter["slug"] in update_data["newsletters"] else "unsubscribed",
+                "subscription_state": "subscribed" if update_data["newsletters"].get(newsletter["slug"], False) else "unsubscribed",
             }
             for newsletter in newsletters
         ]
