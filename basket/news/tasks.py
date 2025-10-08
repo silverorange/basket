@@ -257,7 +257,6 @@ def upsert_contact(api_call_type, data, user_data):
         to_subscribe_slugs = [nl for nl, sub in update_data["newsletters"].items() if sub]
         check_optin = not (forced_optin or (user_data and user_data.get("optin")))
         check_mofo = not (user_data and user_data.get("mofo_relevant"))
-        # to_subscribe_braze_ids = list(Newsletter.objects.filter(slug__in=to_subscribe_slugs).values_list("vendor_id", flat=True))
 
         if to_subscribe_slugs and (check_optin or check_mofo):
             to_subscribe = Newsletter.objects.filter(slug__in=to_subscribe_slugs)
