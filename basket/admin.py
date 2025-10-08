@@ -159,7 +159,9 @@ class BasketAdminSite(admin.AdminSite):
                         try:
                             braze.dsar_unsubscribe(email)
                             output.append(f"BRAZE UNSUBSCRIBED: {email}")
-                        except Exception:
+                        except Exception as e:
+                            sentry_sdk.capture_exception()
+                            log.error(f"Braze unsubscribe error: {e}")
                             output.append(f"BRAZE ERROR: Could not unsubscribe {email}")
 
                     contact = ctms.get(email=email)

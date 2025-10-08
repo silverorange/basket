@@ -4,6 +4,8 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.core.cache import cache
 
+import sentry_sdk
+
 from basket import metrics
 from basket.base.decorators import rq_task
 from basket.base.exceptions import BasketError
@@ -304,10 +306,14 @@ def upsert_contact(api_call_type, data, user_data):
 
     # unsubcribe from newsletters in Braze
     if settings.BRAZE_UNSUBSCRIBE_ENABLE and api_call_type == UNSUBSCRIBE:
-        if settings.MAINTENANCE_MODE:
-            braze_unsubscribe.delay(update_data)
-        else:
-            braze_unsubscribe(update_data)
+        try:
+            if settings.MAINTENANCE_MODE:
+                braze_unsubscribe.delay(update_data)
+            else:
+                braze_unsubscribe(update_data)
+        except Exception as e:
+            sentry_sdk.capture_exception()
+            log.error(f"Braze unsubscribe error: {e}")
 
     # update record
     if user_data and user_data.get("token"):
