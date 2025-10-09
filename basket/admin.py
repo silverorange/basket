@@ -167,16 +167,15 @@ class BasketAdminSite(admin.AdminSite):
                     contact = ctms.get(email=email)
                     if contact:
                         email_id = contact["email_id"]
-                        not_found_error_message = f"{'CTMS ERROR: ' if is_braze_enabled else ''}{email} not found in CTMS"
                         try:
                             ctms.interface.patch_by_email_id(email_id, update_data)
                         except CTMSNotFoundByEmailIDError:
                             # should never reach here, but best to catch it anyway
-                            output.append(not_found_error_message)
+                            output.append(f"{email} not found in CTMS")
                         else:
                             output.append(f"{'CTMS UNSUBSCRIBED:' if is_braze_enabled else 'UNSUBSCRIBED'} {email} (ctms id: {email_id}).")
                     else:
-                        output.append(not_found_error_message)
+                        output.append(f"{'CTMS ERROR: ' if is_braze_enabled else ''}{email} not found in CTMS")
 
                 output = "\n".join(output)
 
