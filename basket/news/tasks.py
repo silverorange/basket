@@ -503,7 +503,9 @@ def braze_update_user_attributes(update_data, forced_optin):
     new_attributes = {}
 
     if forced_optin == "Y":
-        new_attributes["email_subscribe"] = True
+        new_attributes["email_subscribe"] = "opted_in"
+    if forced_optin == "N":
+        new_attributes["email_subscribe"] = "unsubscribed"
     if update_data.get("country"):
         new_attributes["country"] = update_data["country"]
     if update_data.get("lang"):
