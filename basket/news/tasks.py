@@ -306,11 +306,12 @@ def upsert_contact(api_call_type, data, user_data):
         update_data["optout"] = False
 
     if settings.BRAZE_POST_USER_ENABLE and api_call_type == SET:
+        is_newsletter_update = "newsletters" in data
         try:
             if settings.MAINTENANCE_MODE:
-                braze_update_user_attributes.delay(update_data, forced_optin)
+                braze_update_user_attributes.delay(update_data, is_newsletter_update, forced_optin)
             else:
-                braze_update_user_attributes(update_data, forced_optin)
+                braze_update_user_attributes(update_data, is_newsletter_update, forced_optin)
         except Exception as e:
             sentry_sdk.capture_exception()
             log.error(f"Braze user update error: {e}")
@@ -496,7 +497,7 @@ def get_fxa_user_data(fxa_id, email):
 
 
 @rq_task
-def braze_update_user_attributes(update_data, forced_optin):
+def braze_update_user_attributes(update_data, is_newsletter_update, forced_optin):
     """
     Updates user attributes in Braze for existing users
     """
@@ -511,7 +512,7 @@ def braze_update_user_attributes(update_data, forced_optin):
     if update_data.get("lang"):
         new_attributes["language"] = update_data["lang"]
 
-    if update_data["newsletters"]:
+    if is_newsletter_update and update_data["newsletters"]:
         newsletters = Newsletter.objects.filter(slug__in=update_data["newsletters"]).values("vendor_id", "slug")
         new_attributes["subscription_groups"] = [
             {
