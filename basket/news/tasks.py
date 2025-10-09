@@ -4,6 +4,8 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.core.cache import cache
 
+import sentry_sdk
+
 from basket import metrics
 from basket.base.decorators import rq_task
 from basket.base.exceptions import BasketError
@@ -304,10 +306,14 @@ def upsert_contact(api_call_type, data, user_data):
         update_data["optout"] = False
 
     if settings.BRAZE_POST_USER_ENABLE and api_call_type == SET:
-        if settings.MAINTENANCE_MODE:
-            braze_update_user_attributes.delay(update_data, forced_optin)
-        else:
-            braze_update_user_attributes(update_data, forced_optin)
+        try:
+            if settings.MAINTENANCE_MODE:
+                braze_update_user_attributes.delay(update_data, forced_optin)
+            else:
+                braze_update_user_attributes(update_data, forced_optin)
+        except Exception as e:
+            sentry_sdk.capture_exception()
+            log.error(f"Braze user update error: {e}")
 
     # update record
     if user_data and user_data.get("token"):
