@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 
 import requests
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from basket.base.utils import is_valid_uuid
 from basket.news.backends.ctms import ctms, process_country, process_lang
@@ -80,6 +81,12 @@ class BrazeInterface:
 
         self.active = bool(self.api_key)
 
+    @retry(
+        reraise=True,
+        retry=retry_if_exception_type(BrazeRateLimitError),
+        stop=stop_after_attempt(5),
+        wait=wait_fixed(2),
+    )
     def _request(self, endpoint, data=None, method="POST", params=None):
         """
         Make a request to the Braze API.
