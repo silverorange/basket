@@ -189,7 +189,8 @@ class BasketAdminSite(admin.AdminSite):
                                             "unsub_reason": update_data["email"]["unsubscribe_reason"],
                                             "newsletters": parse_newsletters(
                                                 UNSUBSCRIBE,
-                                                contact.get("newsletters"),
+                                                contact.get("newsletters", []),
+                                                contact.get("newsletters", []),
                                             ),
                                         },
                                     )
