@@ -617,6 +617,6 @@ def parse_newsletters(api_call_type, newsletters, cur_newsletters):
     return newsletter_map
 
 
-def get_post_request_body(request: HttpRequest, allowed_keys: list["str"]):
+def get_post_request_body(request: HttpRequest, allowed_keys: list[str]):
     "Extracts the body of a POST request, but only includes the allowed keys."
     return {key: request.POST[key] for key in request.POST if key in allowed_keys}
